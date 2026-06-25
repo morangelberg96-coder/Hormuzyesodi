@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לומדה - סודו של מצר הורמוז</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: { 
+                extend: { 
+                    colors: { 
+                        primary: '#B31942',
+                        secondary: '#0A3161',
+                        accent: '#bfdbfe',
+                        bglight: '#f8fafc',
+                        success: '#FF1493',
+                        error: '#EF4444',
+                        highlight: '#FFFF00'
+                    }, 
+                    fontFamily: { sans: ['Fredoka', 'sans-serif'] },
+                    animation: {
+                        'glow': 'glow 1.5s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px var(--tw-colors-accent)' },
+                            '100%': { boxShadow: '0 0 20px var(--tw-colors-secondary)' }
+                        }
+                    }
+                } 
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Fredoka', sans-serif; background-color: theme('colors.bglight'); color: #451A03; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .shake { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+        .flip-card { perspective: 1000px; cursor: pointer; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s; transform-style: preserve-3d; }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; padding: 1rem; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .flip-card-front { background-color: #0A3161 !important; color: #ffffff !important; border: 2px solid #B31942; }
+        .flip-card-back { background-color: #ffffff !important; color: #0A3161 !important; transform: rotateY(180deg); border: 2px solid #0A3161; }
+        .reading-glow { background-color: #FF1493 !important; color: #ffffff !important; border: 2px solid #0A3161 !important; border-radius: 6px; box-shadow: 0 0 15px #FF1493 !important; padding: 0px 4px; font-weight: normal !important; transition: all 0.1s ease; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: theme('colors.bglight'); }
+        ::-webkit-scrollbar-thumb { background: theme('colors.secondary'); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: theme('colors.primary'); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo } = React;
+        const CONTENT = {
+            title: "סוֹדוֹ שֶׁל מֵצַר הוֹרְמוּז - הַנָּתִיב שֶׁל הָעוֹלָם",
+            homeSubtitle1: "נלמד על מעבר הים החשוב ביותר שמחבר בין מדינות רבות.",
+            homeSubtitle2: "נבין למה סירות, נפט וכסף קשורים אחד לשני בים הגדול.",
+            homeBtn: "התחילו ללמוד",
+            audience: "הבנת הנקרא וגיאוגרפיה - כיתות ד'-ה'",
+            paragraphs: [
+                { id: "א'", text: "מֵצַר מַיִם הוּא כְּמוֹ כְּבִישׁ צַר שֶׁל מַיִם הַמְּחַבֵּר בֵּין שְׁנֵי יַמִּים גְּדוֹלִים וּמַפְרִיד בֵּין שְׁתֵּי יַבָּשׁוֹת. מֵצַר הוֹרְמוּז הוּא נָתִיב מַיִם חָשׁוּב מְאוֹד. הוּא מְחַבֵּר בֵּין הַמִּפְרָץ הַפַּרְסִי לְבֵין הָאוֹקְיָינוֹס. בַּחֵלֶק הַצַּר בְּיוֹתֵר שֶׁלּוֹ, הָרוֹחַב שֶׁל הַמֵּצַר הוּא כִּשְׁלוֹשִׁים וְתִשְׁעָה קִילוֹמֶטְרִים בִּלְבַד. מְדִינַת אִירָאן נִמְצֵאת מִצָּפוֹן לַמֵּצַר, וּמִדָּרוֹם לוֹ מְמוּקָּמוֹת מְדִינוֹת כְּמוֹ עוֹמָאן. לְאוֹר הָעוּבְדָּה שֶׁהוּא כֹּה צַר אַךְ כֻּלָּם נִדְרָשִׁים לַעֲבוֹר דַּרְכּוֹ, הוּא מְכוּנֶּה \"צַוַּאר בַּקְבּוּק\". אִם תִּקְרֶה בּוֹ תְּקָלָה וְהוּא יִסָּגֵר, הָעוֹלָם כֻּלּוֹ יַרְגִּישׁ בְּכָךְ.", pyramid: ["מֵצַר", "מֵצַר מַיִם", "מֵצַר מַיִם הוּא", "מֵצַר מַיִם הוּא כְּמוֹ", "מֵצַר מַיִם הוּא כְּמוֹ כְּבִישׁ צַר"], video: null, questions: [ { category: "הבנה", q: "לָמָּה מְדַמִּים בַּפִּסְקָה אֶת הַמִּילָּה 'מֵצַר'?", options: ["לְאוֹקְיָינוֹס גָּדוֹל מְאוֹד וְרָחָב", "לִכְבִישׁ מַיִם צַר הַמְּחַבֵּר בֵּין שְׁנֵי יַמִּים", "לְסִירָה קְטַנָּה שֶׁשָּׁטָה מַהֵר"], a: 1 }, { category: "פרטים", q: "אֵיזוֹ מְדִינָה נִמְצֵאת מִצָּפוֹן לְמֵצַר הוֹרְמוּז?", options: ["יִשְׂרָאֵל", "עוֹמָאן", "אִירָאן"], a: 2 }, { category: "פרטים", q: "מַהוּ הָרוֹחַב שֶׁל הַמֵּצַר בַּחֵלֶק הַצַּר בְּיוֹתֵר שֶׁלּוֹ?", options: ["כִּשְׁלוֹשִׁים וְתִשְׁעָה קִילוֹמֶטְרִים", "מֵאוֹת קִילוֹמֶטְרִים", "שְׁנֵי קִילוֹמֶטְרִים בִּלְבַד"], a: 0 }, { category: "מסקנות", q: "מַדּוּעַ מְכוּנֶּה הַמֵּצַר 'צַוַּאר בַּקְבּוּק'?", options: ["בִּגְלַל שֶׁמְּיַצְּרִים בּוֹ בַּקְבּוּקִים לִשְׁתִיָּה", "לְאוֹר הָעוּבְדָּה שֶׁהוּא כֹּה צַר אַךְ כֻּלָּם נִדְרָשִׁים לַעֲבוֹר דַּרְכּוֹ", "כִּי הַמַּיִם בּוֹ בְּצֶבַע שֶׁל בַּקְבּוּק זְכוּכִית"], a: 1 } ] },
+                { id: "ב'", text: "מַדּוּעַ הַמֵּצַר הַזֶּה כֹּה חָשׁוּב? מִשּׁוּם שֶׁדַּרְכּוֹ עוֹבֶרֶת הַרְבֵּה מְאוֹד אֶנֶרְגְּיָה. אֵזוֹר הַמִּפְרָץ הַפַּרְסִי עָשִׁיר מְאוֹד בְּנֵפְטְ וְגַז מִתַּחַת לָאֲדָמָה. מְדִינוֹת כְּמוֹ עֲרָב הַסְּעוּדִית וְעִירָאק שׁוֹאֲבוֹת אֶת הַנֵּפְטְ הַזֶּה. כְּדֵי לִמְכּוֹר אֶת הַנֵּפְטְ לִמְדִינוֹת אֲחֵרוֹת בָּעוֹלָם, הֵן מַעֲמִיסוֹת אוֹתוֹ עַל אוֹנִיּוֹת עֲנָקִיּוֹת הַנִּקְרָאוֹת מִיכָלִיּוֹת. הַמִּיכָלִיּוֹת מַפְלִיגוֹת דֶּרֶךְ מֵצַר הוֹרְמוּז מֵהַמִּפְרָץ הַחוּצָה. מִשָּׁם הֵן מַמְשִׁיכוֹת לִמְדִינוֹת רְחוֹקוֹת כְּמוֹ סִין, יַפָּן וְאַף לְאֵירוֹפָּה. לְלֹא הַמֵּצַר הַזֶּה, לִמְדִינוֹת רַבּוֹת יֶחְסַר מָקוֹר דֶּלֶק חָשׁוּב.", pyramid: ["הַמִּיכָלִיּוֹת", "הַמִּיכָלִיּוֹת מַפְלִיגוֹת", "הַמִּיכָלִיּוֹת מַפְלִיגוֹת דֶּרֶךְ", "הַמִּיכָלִיּוֹת מַפְלִיגוֹת דֶּרֶךְ מֵצַר", "הַמִּיכָלִיּוֹת מַפְלִיגוֹת דֶּרֶךְ מֵצַר הוֹרְמוּז"], video: null, questions: [ { category: "הבנה", q: "מַדּוּעַ מֵצַר הוֹרְמוּז הוּא מָקוֹם כֹּה חָשׁוּב בָּעוֹלָם?", options: ["כִּי עוֹבֶרֶת בּוֹ כַּמּוּת גְּדוֹלָה מְאוֹד שֶׁל נֵפְטְ וְגַז", "בִּגְלַל שֶׁיֵּשׁ בּוֹ אֶת הַדָּגִים הֲכִי גְּדוֹלִים בַּיָּם", "כִּי זֶה הַמָּקוֹם הַיָּחִיד שֶׁאֶפְשָׁר לִשְׂחוֹת בּוֹ בָּטוּחַ"], a: 0 }, { category: "פרטים", q: "אֵיךְ נִקְרָאוֹת הָאוֹנִיּוֹת הָעֲנָקִיּוֹת שֶׁמּוֹבִילוֹת אֶת הַנֵּפְטְ?", options: ["סִירוֹת מָנוֹעַ", "מִיכָלִיּוֹת", "מִפְרָשִׂיּוֹת"], a: 1 }, { category: "אזכורים", q: "לְאֵילּוּ מְדִינוֹת רְחוֹקוֹת מַפְלִיגוֹת הַמִּיכָלִיּוֹת עִם הַנֵּפְטְ?", options: ["לִמְדִינוֹת בְּאַסְיָה כְּמוֹ סִין וְיַפָּן וְאַף לְאֵירוֹפָּה", "הֵן חוֹזְרוֹת מִיָּד לְאוֹתָהּ מְדִינָה שֶׁמִּמֶּנָּה יָצְאוּ", "הֵן מַפְלִיגוֹת רַק לִמְדִינוֹת קְטַנּוֹת בְּאַפְרִיקָה"], a: 0 }, { category: "מסקנות", q: "מָה יִקְרֶה לִמְדִינוֹת רַבּוֹת אִם לֹא יוּכְלוּ לְהִשְׁתַּמֵּשׁ בַּמֵּצַר?", options: ["יִהְיֶה לָהֶן יוֹתֵר מִדַּי נֵפְטְ וְהֵן לֹא יֵדְעוּ מָה לַעֲשׂוֹת אִתּוֹ", "הֵן יוּכְלוּ לִקְנוֹת נֵפְטְ רַק מִמַּשָּׂאִיּוֹת", "יֶחְסַר לָהֶן מָקוֹר חָשׁוּב וּמֶרְכָּזִי שֶׁל דֶּלֶק"], a: 2 } ] },
+                { id: "ג'", text: "לְאוֹר הַחֲשִׁיבוּת הַגְּדוֹלָה שֶׁלּוֹ, יֵשׁ לְעִתִּים מְתִיחוּת רַבָּה סְבִיב הַמֵּצַר. אִירָאן לְעִתִּים מְאַיֶּמֶת לִסְגּוֹר אֶת מַעֲבַר הָאוֹנִיּוֹת כַּאֲשֶׁר יֵשׁ לָהּ סִכְסוּךְ עִם מְדִינוֹת אֲחֵרוֹת. אַךְ, חֻקֵּי הָעוֹלָם קוֹבְעִים שֶׁמֵּצַר מַיִם חַיָּב לְהִשָּׁאֵר פָּתוּחַ לְכָל אוֹנִיַּת מִסְחָר עֲבוּר תְּנוּעָה חָפְשִׁית. כְּדֵי לִשְׁמוֹר עַל הַסֵּדֶר וְלִמְנוֹעַ מֵאִירָאן לַחֲסוֹם אֶת הַדֶּרֶךְ, אַרְצוֹת הַבְּרִית מַצִּיבָה שָׁם אֶת סְפִינוֹתֶיהָ. סְפִינוֹת הַמִּלְחָמָה הָאָמֵרִיקָנִיּוֹת מְסַיְּעוֹת לְהַבְטִיחַ שֶׁהָאוֹנִיּוֹת הָרְגִילוֹת שֶׁמּוֹבִילוֹת אוֹכֶל וְנֵפְטְ יַעַבְרוּ בְּשָׁלוֹם וּבְבִטְחָה לְלֹא פַּחַד.", pyramid: ["אַרְצוֹת הַבְּרִית", "אַרְצוֹת הַבְּרִית מַצִּיבָה", "אַרְצוֹת הַבְּרִית מַצִּיבָה צָבָא", "אַרְצוֹת הַבְּרִית מַצִּיבָה צָבָא יַמִּי", "אַרְצוֹת הַבְּרִית מַצִּיבָה אֶת סְפִינוֹתֶיהָ"], video: null, questions: [ { category: "פרטים", q: "מָה אִירָאן מְאַיֶּמֶת לַעֲשׂוֹת כַּאֲשֶׁר יֵשׁ לָהּ סִכְסוּךְ?", options: ["לִשְׁתּוֹל הַרְבֵּה עֵצִים סְבִיב הַיָּם", "לִסְגּוֹר וְלַחְסוֹם אֶת מַעֲבַר הָאוֹנִיּוֹת בַּמֵּצַר", "לְהַפְסִיק לִמְכּוֹר פֵּירוֹת וִירָקוֹת"], a: 1 }, { category: "ידע", q: "מָה קוֹבְעִים חֻקֵּי הָעוֹלָם עַל מֵיצְרֵי מַיִם כְּמוֹ הוֹרְמוּז?", options: ["שֶׁכָּל מְדִינָה יְכוֹלָה לִסְגּוֹר אוֹתָם מָתַי שֶׁתִּרְצֶה", "שֶׁאָסוּר לְהַפְלִיג בָּהֶם בַּלֵּילוֹת כְּדֵי לֹא לְהַפְרִיעַ לַדָּגִים", "שֶׁהֵם חַיָּבִים לְהִשָּׁאֵר פְּתוּחִים לְכָל אוֹנִיַּת מִסְחָר"], a: 2 }, { category: "הבנה", q: "מִי שׁוֹמֵר עַל הַסֵּדֶר בַּמֵּצַר כְּדֵי שֶׁלֹּא יַחְסְמוּ אוֹתוֹ?", options: ["סְפִינוֹת מִלְחָמָה שֶׁל אַרְצוֹת הַבְּרִית", "מִשְׁטֶרֶת הַתְּנוּעָה שֶׁל אִירָאן", "סִירוֹת דַּיִג מְיוּחָדוֹת"], a: 0 }, { category: "מסקנות", q: "מַדּוּעַ חָשׁוּב לִשְׁמוֹר עַל הָאוֹנִיּוֹת שֶׁעוֹבְרוֹת בַּמֵּצַר?", options: ["כְּדֵי לְהַבְטִיחַ שֶׁהַנֵּפְטְ וְהַסְּחוֹרוֹת יַעַבְרוּ בְּשָׁלוֹם וּבְבִטְחָה", "כִּי הֵן אוֹנִיּוֹת יָפוֹת שֶׁחֲבָל שֶׁיִּפָּגְעוּ", "כִּי תַּחְלוּפַת הָאוֹנִיּוֹת עוֹלָה הֲמוֹן כֶּסֶף"], a: 0 } ] },
+                { id: "ד'", text: "מָה יִקְרֶה אִם מֵצַר הוֹרְמוּז בֶּאֱמֶת יִסָּגֵר יוֹם אֶחָד? הַהַשְׁלָכוֹת יִהְיוּ קָשׁוֹת עֲבוּר כֻּלָּנוּ. פִּתְאוֹם יֶחְסַר הַרְבֵּה דֶּלֶק בָּעוֹלָם. כַּאֲשֶׁר מוּצָר חָסֵר בַּשּׁוּק, הַמְּחִיר שֶׁלּוֹ מְזַנֵּק מַעְלָה בִּמְהִירוּת. מְחִיר הַדֶּלֶק יַעֲלֶה מְאוֹד, וְהַדָּבָר יַשְׁפִּיעַ עַל הַכֹּל: הוּא יְיַקֵּר אֶת מְחִירֵי הַתַּחְבּוּרָה (מְכוֹנִיּוֹת וְאוֹטוֹבּוּסִים), וְאַף הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט יַעֲלֶה הַרְבֵּה יוֹתֵר, מִשּׁוּם שֶׁהַדֶּלֶק שֶׁל מַשָּׂאִיּוֹת הַמָּזוֹן יִהְיֶה יָקָר. לְפִיכָךְ, חָשׁוּב מְאוֹד לְכָל מְדִינוֹת הָעוֹלָם לִשְׁמוֹר עַל הַמֵּצַר פָּתוּחַ וְשָׁקֵט, כְּדֵי שֶׁהַחַיִּים יַמְשִׁיכוּ כְּסִדְרָם.", pyramid: ["הָאוֹכֶל", "הָאוֹכֶל יַעֲלֶה", "הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט יַעֲלֶה", "הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט יַעֲלֶה הַרְבֵּה", "הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט יַעֲלֶה הַרְבֵּה יוֹתֵר"], video: null, questions: [ { category: "הבנה", q: "מָה הַדָּבָר הָרִאשׁוֹן שֶׁיִּקְרֶה בָּעוֹלָם אִם הַמֵּצַר יִסָּגֵר?", options: ["יֶחְסַר הַרְבֵּה מְאוֹד דֶּלֶק וְיִהְיֶה קָשֶׁה לְהַשִּׂיג אוֹתוֹ", "מְחִירֵי הַצַּעֲצוּעִים יֵרְדוּ מִיָּד בַּחֲנוּיּוֹת", "יִהְיֶה יוֹתֵר מִדַּי נֵפְטְ וְאַף אֶחָד לֹא יִרְצֶה אוֹתוֹ"], a: 0 }, { category: "אזכורים", q: "כַּאֲשֶׁר מוּצָר חָסֵר בַּשּׁוּק, מָה קוֹרֶה לַמְּחִיר שֶׁלּוֹ?", options: ["הַמְּחִיר שֶׁלּוֹ נִשְׁאָר כְּשֶׁהָיָה לְלֹא שִׁינּוּי", "הַמְּחִיר שֶׁלּוֹ מְזַנֵּק מַעְלָה בִּמְהִירוּת", "הַמּוּצָר נִיתָּן בְּחִינָּם לְכָל מִי שֶׁמְּבַקֵּשׁ"], a: 1 }, { category: "פרטים", q: "אֵיזֶה דָּבָר יוֹמְיוֹמִי יִתְיַקֵּר מְאוֹד בִּגְלַל מְחִיר הַדֶּלֶק?", options: ["בִּגְדֵי הַיָּם בַּחוֹף", "הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט וּמְחִירֵי הַתַּחְבּוּרָה", "הַמַּיִם שֶׁאֲנַחְנוּ שׁוֹתִים בַּבֶּרֶז"], a: 1 }, { category: "מסקנות", q: "מַדּוּעַ כָּל מְדִינוֹת הָעוֹלָם רוֹצוֹת לִשְׁמוֹר עַל הַמֵּצַר פָּתוּחַ?", options: ["כְּדֵי לַחְסוֹךְ זְמַן טִיסָה לַמְּטוֹסִים בַּשָּׁמַיִם", "כְּדֵי לִשְׁמוֹר עַל אוֹנִיּוֹת קְטַנּוֹת שֶׁלֹּא יִטְבְּעוּ", "כְּדֵי שֶׁהַמְּחִירִים לֹא יַעֲלוּ וְהַחַיִּים יַמְשִׁיכוּ כְּסִדְרָם"], a: 2 } ] }
+            ],
+            vocab: [
+                { word: "מֵצַר", meaning: "מַעֲבַר מַיִם צַר בֵּין שְׁתֵּי יַבָּשׁוֹת גְּדוֹלוֹת." },
+                { word: "מִיכָלִית", meaning: "אוֹנִיָּה עֲנָקִית שֶׁבְּנוּיָה לְהוֹבִיל דֶּלֶק וְנוֹזְלִים." },
+                { word: "מִסְחָר", meaning: "קְנִיָּה, מְכִירָה אוֹ הַחְלָפָה שֶׁל מוּצָרִים בֵּין אֲנָשִׁים." },
+                { word: "סְחוֹרוֹת", meaning: "מוּצָרִים שֶׁמְּיַצְּרִים אוֹתָם כְּדֵי לִמְכּוֹר (כְּמוֹ בְּגָדִים וְאֹכֶל)." },
+                { word: "אִיּוּם", meaning: "אַזְהָרָה עַל כַּוָּנָה לַעֲשׂוֹת מַשֶּׁהוּ רַע וּלְהַזִּיק." }
+            ],
+            vocabSentences: [
+                { sentence: "הַסְּפִינָה שָׁטָה מֵהַיָּם לָאוֹקְיָינוֹס בַּדֶּרֶךְ וְעָבְרָה בְּ___ הַצַּר.", answer: "מֵצַר", options: ["אִיּוּם", "מִסְחָר", "מֵצַר"] },
+                { sentence: "עַל הַ___ שֶׁעָמְדָה בַּנָּמֵל שָׂמוּ הֲמוֹן נֵפְטְ כְּדֵי לְהַעֲבִיר אוֹתוֹ רָחוֹק.", answer: "מִיכָלִית", options: ["סְחוֹרוֹת", "מִיכָלִית", "מֵצַר"] },
+                { sentence: "בֵּין מְדִינַת יִשְׂרָאֵל וְאַרְצוֹת הַבְּרִית יֵשׁ יַחֲסֵי ___ וְהֵן קוֹנוֹת זוֹ מִזּוֹ מוּצָרִים.", answer: "מִסְחָר", options: ["מִסְחָר", "מִיכָלִית", "אִיּוּם"] },
+                { sentence: "הַמַּשָּׂאִית הִגִּיעָה לַחֲנוּת הַגְּדוֹלָה כְּדֵי לִפְרוֹק אֶת כָּל הַ___ הַחֲדָשׁוֹת לַקּוֹנִים.", answer: "סְחוֹרוֹת", options: ["מֵצַר", "אִיּוּם", "סְחוֹרוֹת"] },
+                { sentence: "הָאַרְיֵה שָׁאַג חָזָק וְחָשַׂף אֶת שִׁנָּיו, זֶה הָיָה ___ שֶׁהִפְחִיד אֶת כָּל הַחַיּוֹת.", answer: "אִיּוּם", options: ["מִסְחָר", "אִיּוּם", "מִיכָלִית"] }
+            ],
+            auditory: [
+                { word: "נָתִיב", options: ["נָתִיב", "נָדִיב", "מֵנִיב"] },
+                { word: "מִיכָלִית", options: ["רַמְקוֹלִית", "מִיכָלִית", "מְכוֹנִית"] },
+                { word: "סְחוֹרוֹת", options: ["תַּחְרוּיוֹת", "מְהִירוּת", "סְחוֹרוֹת"] },
+                { word: "מִסְחָר", options: ["מִשְׁמָר", "מִסְחָר", "מִבְצָר"] },
+                { word: "מִפְרָץ", options: ["מִפְרָץ", "מִרְכָּז", "מִפְרָשׂ"] }
+            ],
+            openQuestions: [
+                "הַסְבִּירוּ בְּמִילִּים שֶׁלָּכֶם: מַהוּ \"מֵצַר מַיִם\", וּמָה מְיוּחָד בְּמֵצַר הוֹרְמוּז?",
+                "כֵּיצַד מַגִּיעַ הַנֵּפְטְ מֵהָאֲדָמָה הָרְחוֹקָה בְּאִירָאן אוֹ סְעוּדְיָה אֶל מְדִינוֹת כְּמוֹ סִין?",
+                "מַדּוּעַ מְחִירֵי הָאוֹכֶל בַּסּוּפֶּרְמַרְקֶט שֶׁלָּכֶם עֲשׂוּיִים לַעֲלוֹת אִם יִסְגְּרוּ אֶת הַמֵּצַר?"
+            ],
+            linguistic: [
+                { q: "מַהוּ הַשּׁוֹרֶשׁ שֶׁל הַמִּילָּה 'מַעֲמִיסוֹת'?", options: ["מ-ע-ס", "ע-מ-ס", "ע-ס-ס"], a: 1 },
+                { q: "מָה הַהֵפֶךְ מֵהַמִּילָּה 'יָקָר'?", options: ["יָשָׁן", "כָּבֵד", "זוֹל"], a: 2 },
+                { q: "הַמִּילָּה 'סְפִינוֹת' הִיא בְּצוּרַת:", options: ["זָכָר רַבִּים", "נְקֵבָה רַבּוֹת", "נְקֵבָה יְחִידָה"], a: 1 },
+                { q: "בְּאֵיזֶה זְמַן מְנוּסָּח הַפּוֹעַל 'יַעֲלֶה'?", options: ["הוֹוֶה", "עָבָר", "עָתִיד"], a: 2 },
+                { q: "אֵיזוֹ מִילָּה הִיא מִילָּה נִרְדֶּפֶת לַמִּילָּה 'אוֹנִיָּה'?", options: ["רַכֶּבֶת", "סְפִינָה", "מַשָּׂאִית"], a: 1 }
+            ],
+            analogies: [
+                { q: "כְּבִישׁ : מְכוֹנִית  -->  יָם : ?", options: ["סְפִינָה", "שָׁמַיִם", "רַכֶּבֶת"], a: 0 },
+                { q: "לִקְנוֹת : כֶּסֶף  -->  לֶאֱפוֹת : ?", options: ["חֲנוּת", "קֶמַח", "תַּפּוּחַ"], a: 1 },
+                { q: "צָפוֹן : דָּרוֹם  -->  מֵעַל : ?", options: ["קָרוֹב", "מִתַּחַת", "גָּבוֹהַּ"], a: 1 },
+                { q: "פָּתוּחַ : סָגוּר  -->  יָקָר : ?", options: ["אָרוֹךְ", "זוֹל", "חָדָשׁ"], a: 1 },
+                { q: "שָׁמַיִם : מָטוֹס  -->  פַּסִּים : ?", options: ["רַכֶּבֶת", "אֲדָמָה", "אוֹפַנַּיִם"], a: 0 }
+            ],
+            comparisonText: "בְּאֵזוֹר מֵצַר הוֹרְמוּז יֵשׁ שְׁנֵי כֹּחוֹת גְּדוֹלִים שֶׁפּוֹעֲלִים בַּמַּיִם. מִצַּד אֶחָד, אִירָאן רוֹצָה לְהִשְׁתַּמֵּשׁ בַּמֵּצַר כְּדֵי לִלְחוֹץ עַל הָעוֹלָם, וּלְעִתִּים הִיא מְאַיֶּמֶת לַחְסוֹם אוֹתוֹ לְאוֹנִיּוֹת. מִצַּד שֵׁנִי, אַרְצוֹת הַבְּרִית רוֹצָה שֶׁהַמֵּצַר יִשָּׁאֵר פָּתוּחַ לַחֲלוּטִין לְכֻלָּם, וְהִיא מַצִּיבָה שָׁם סְפִינוֹת מִלְחָמָה כְּדֵי לִשְׁמוֹר עַל הָאוֹנִיּוֹת שֶׁעוֹבְרוֹת בּוֹ מִפְּנֵי אִיּוּמִים.",
+            comparisonTable: {
+                headers: ["מְאַפְיֵין", "אִירָאן", "אַרְצוֹת הַבְּרִית"],
+                rows: [
+                    { prop: "מִיקּוּם גֵּאוֹגְרָפִי", a1: "שׁוֹכֶנֶת מַמָּשׁ עַל חוֹפֵי הַמֵּצַר וּקְרוֹבָה מְאוֹד", a2: "נִמְצֵאת רָחוֹק מְאוֹד אַךְ שׁוֹלַחַת צָבָא לָאֵזוֹר" },
+                    { prop: "הַמַּטָּרָה שֶׁלָּהֶם בַּיָּם", a1: "לְאַיֵּים בַּחֲסִימַת הַמַּעֲבָר כְּדֵי לִלְחוֹץ עַל הָעוֹלָם", a2: "לִשְׁמוֹר שֶׁהַמֵּצַר יִהְיֶה פָּתוּחַ וּבָטוּחַ לְמִסְחָר" },
+                    { prop: "אֵיךְ הֵם פּוֹעֲלִים?", a1: "רוֹצָה לִשְׁלוֹט עַל הַמַּעֲבָר מֵהַחוֹף שֶׁלָּהּ", a2: "מְבִיאָה סְפִינוֹת מִלְחָמָה שֶׁשּׁוֹמְרוֹת עַל הַסֵּדֶר" }
+                ],
+                wordBank: ["שׁוֹכֶנֶת מַמָּשׁ עַל חוֹפֵי הַמֵּצַר וּקְרוֹבָה מְאוֹד", "נִמְצֵאת רָחוֹק מְאוֹד אַךְ שׁוֹלַחַת צָבָא לָאֵזוֹר", "לְאַיֵּים בַּחֲסִימַת הַמַּעֲבָר כְּדֵי לִלְחוֹץ עַל הָעוֹלָם", "לִשְׁמוֹר שֶׁהַמֵּצַר יִהְיֶה פָּתוּחַ וּבָטוּחַ לְמִסְחָר", "רוֹצָה לִשְׁלוֹט עַל הַמַּעֲבָר מֵהַחוֹף שֶׁלָּהּ", "מְבִיאָה סְפִינוֹת מִלְחָמָה שֶׁשּׁוֹמְרוֹת עַל הַסֵּדֶר"]
+            },
+            flashData: [
+                { word: "מֵצַר", options: ["מֵצַר", "מֶלְצַר", "מֵצַד"] },
+                { word: "הוֹרְמוּז", options: ["הוֹרְמוּז", "הוֹרְמוֹן", "רוֹמֵז"] },
+                { word: "אִירָאן", options: ["אִירָאן", "עִירָאק", "אִילָן"] },
+                { word: "נֵפְטְ", options: ["נֵפְטְ", "נֹפֶשׁ", "פֶּנְטְ"] },
+                { word: "מִיכָלִיּוֹת", options: ["מִיכָלִיּוֹת", "מְכוֹנִיּוֹת", "מַלְכֻּיּוֹת"] },
+                { word: "מִסְחָר", options: ["מִסְחָר", "מִשְׁמָר", "מִבְצָר"] },
+                { word: "דֶּלֶק", options: ["חֵלֶק", "דֶּלֶק", "בֶּדֶק"] },
+                { word: "יַבָּשָׁה", options: ["יַבָּשָׁה", "יַבְחוּשׁ", "בַּקָּשָׁה"] },
+                { word: "אוֹנִיָּה", options: ["אוֹנִיָּה", "סוּפְגָנִיָּה", "קֻבִּיָּה"] },
+                { word: "תַּחְבּוּרָה", options: ["תַּחְרוּת", "מַחְבֶּרֶת", "תַּחְבּוּרָה"] }
+            ]
+        };
+
+        const playTone = (frequency, type, duration, vol=0.1) => { try { const audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); oscillator.type = type; oscillator.frequency.value = frequency; oscillator.connect(gainNode); gainNode.connect(audioCtx.destination); gainNode.gain.value = vol; oscillator.start(); gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration); setTimeout(() => { oscillator.stop(); audioCtx.close(); }, duration * 1000); } catch(e) {} };
+        const playSuccess = () => { playTone(523.25, 'sine', 0.1, 0.2); setTimeout(() => playTone(659.25, 'sine', 0.2, 0.2), 100); };
+        const playError = () => { playTone(250, 'sawtooth', 0.3, 0.1); };
+        const triggerConfetti = () => { confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#B31942', '#0A3161', '#ffffff', '#FF1493'] }); };
+        const formatText = (text, level) => { if (!text) return ""; if (level === 'none') return text.replace(/[\u0591-\u05C7]/g, ''); if (level === 'partial') return text.replace(/[\u05B0\u05BC\u05BB]/g, ''); return text; };
+
+        const ParagraphHighlighter = ({ text, nikkudLevel }) => {
+            const [highlights, setHighlights] = useState({});
+            const [activeColor, setActiveColor] = useState('#FFFF00');
+            const [isDragging, setIsDragging] = useState(false);
+            const colors = [ { id: '#FFFF00', name: 'צהוב', border: 'border-yellow-400' }, { id: '#FF1493', name: 'ורוד', border: 'border-pink-500' }, { id: '#00FFFF', name: 'תכלת', border: 'border-cyan-400' }, { id: 'transparent', name: 'מחק', icon: 'fa-eraser', border: 'border-gray-300' } ];
+            const handleMouseDown = (idx) => { setIsDragging(true); setHighlights(prev => ({ ...prev, [idx]: activeColor })); };
+            const handleMouseEnter = (idx) => { if (isDragging) setHighlights(prev => ({ ...prev, [idx]: activeColor })); };
+            const handleMouseUp = () => setIsDragging(false);
+            const words = formatText(text, nikkudLevel).split(/\s+/);
+            return (
+                <div className="flex flex-col gap-4" onMouseLeave={handleMouseUp} onMouseUp={handleMouseUp}>
+                    <div className="flex items-center gap-3 bg-blue-50 p-2 rounded-lg border border-accent w-max shadow-sm">
+                        <span className="text-sm font-medium text-secondary">מרקר:</span>
+                        {colors.map(c => ( <button key={c.id} onClick={() => setActiveColor(c.id)} className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${activeColor === c.id ? 'border-secondary scale-110 shadow-md' : c.border}`} style={{ backgroundColor: c.id === 'transparent' ? '#ffffff' : c.id }} title={c.name}>{c.icon && <i className={`fa-solid ${c.icon} text-gray-600 text-sm`}></i>}</button> ))}
+                    </div>
+                    <div className="text-2xl md:text-3xl leading-loose text-justify font-normal text-gray-800 select-none cursor-text">
+                        {words.map((w, i) => ( <span key={i} onMouseDown={() => handleMouseDown(i)} onMouseEnter={() => handleMouseEnter(i)} className="inline-block mx-[2px] cursor-pointer rounded px-1 transition-colors duration-100" style={{ backgroundColor: highlights[i] && highlights[i] !== 'transparent' ? highlights[i] : 'transparent' }}>{w}</span> ))}
+                    </div>
+                </div>
+            );
+        };
+
+        const ScreenHome = ({ onNext, nikkudLevel }) => (
+            <div className="flex flex-col items-center justify-center min-h-[75vh] fade-in text-center relative w-full rounded-2xl border-4 border-secondary bg-bglight pt-10 pb-10 my-4">
+                <div className="absolute top-4 w-full text-center z-20"><div className="text-sm md:text-base font-normal text-white bg-secondary px-6 py-2 rounded-full border-2 border-primary shadow-sm inline-block">{formatText("נוֹצַר עַ\"י מוֹרָן קָמִיל גֶּלְבֶּרְג הוֹרָאָה מוּתְאֶמֶת, בְּאֶמְצָעוּת בִּינָה מְלָאכוּתִית", nikkudLevel)}</div></div>
+                <div className="z-10 flex flex-col items-center space-y-6 bg-white bg-opacity-95 p-10 md:p-14 rounded-3xl shadow-2xl border-2 border-accent w-11/12 max-w-3xl mt-8">
+                    <i className="fa-solid fa-ship text-7xl text-primary drop-shadow-md"></i>
+                    <h1 className="text-5xl md:text-6xl font-bold text-secondary drop-shadow-sm">{formatText(CONTENT.title, nikkudLevel)}</h1>
+                    <p className="text-xl md:text-2xl text-secondary bg-accent bg-opacity-30 p-6 rounded-xl shadow-inner max-w-xl font-normal leading-relaxed border border-accent">{formatText(CONTENT.homeSubtitle1, nikkudLevel)} <br/> {formatText(CONTENT.homeSubtitle2, nikkudLevel)}</p>
+                    <div className="bg-primary text-white px-4 py-1 rounded text-sm font-medium opacity-80">{CONTENT.audience}</div>
+                    <button onClick={onNext} className="mt-8 px-12 py-5 bg-primary text-white text-3xl font-medium rounded-full shadow-lg transform transition hover:scale-110 hover:bg-red-800 animate-glow">{formatText(CONTENT.homeBtn, nikkudLevel)} <i className="fa-solid fa-arrow-left mr-2"></i></button>
+                </div>
+            </div>
+        );
+
+        const ScreenVocab = ({ nikkudLevel }) => {
+            const [flipped, setFlipped] = useState(Array(CONTENT.vocab.length).fill(false));
+            const [answers, setAnswers] = useState(Array(CONTENT.vocabSentences.length).fill(""));
+            const [showFeedback, setShowFeedback] = useState(Array(CONTENT.vocabSentences.length).fill(null));
+            const toggleFlip = (i) => { const n = [...flipped]; n[i] = !n[i]; setFlipped(n); };
+            const handleSelect = (qIdx, val) => { const na = [...answers]; na[qIdx] = val; setAnswers(na); const isCorrect = val === CONTENT.vocabSentences[qIdx].answer; const nf = [...showFeedback]; nf[qIdx] = isCorrect ? 'correct' : 'error'; setShowFeedback(nf); if (isCorrect) { playSuccess(); if (na.every((a, i) => a === CONTENT.vocabSentences[i].answer)) triggerConfetti(); } else playError(); };
+            return (
+                <div className="flex flex-col space-y-8 fade-in pb-10">
+                    <h2 className="text-3xl font-bold text-secondary text-center">אוצר מילים</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        {CONTENT.vocab.map((item, i) => ( <div key={i} className={`flip-card h-32 ${flipped[i] ? 'flipped' : ''}`} onClick={() => toggleFlip(i)}><div className="flip-card-inner"><div className="flip-card-front text-2xl font-medium text-white flex items-center justify-center p-2 leading-tight"><span>{formatText(item.word, nikkudLevel)}</span></div><div className="flip-card-back text-base md:text-lg font-normal flex items-center justify-center p-2 leading-tight"><span>{formatText(item.meaning, nikkudLevel)}</span></div></div></div> ))}
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-md border border-accent">
+                        <h3 className="text-2xl font-medium mb-4 text-secondary">השלימו את המשפטים:</h3>
+                        <div className="space-y-4">
+                            {CONTENT.vocabSentences.map((q, i) => (
+                                <div key={i} className="flex flex-wrap items-center gap-2 text-xl">
+                                    <span className="font-medium text-primary">{i+1}. </span>
+                                    {formatText(q.sentence, nikkudLevel).split('___').map((part, pIdx, arr) => (
+                                        <React.Fragment key={pIdx}><span className="text-gray-800 font-normal">{part}</span>{pIdx < arr.length - 1 && (<div className="relative inline-block"><select className={`border-2 rounded-lg px-3 py-1 font-normal outline-none cursor-pointer appearance-none pr-8 bg-blue-50 ${showFeedback[i] === 'correct' ? 'border-success text-success bg-pink-50' : showFeedback[i] === 'error' ? 'border-error text-error bg-red-50 shake' : 'border-secondary text-secondary'}`} value={answers[i]} onChange={(e) => handleSelect(i, e.target.value)} disabled={showFeedback[i] === 'correct'}><option value="" disabled>בחר מילה</option>{q.options.map(opt => <option key={opt} value={opt}>{formatText(opt, nikkudLevel)}</option>)}</select><i className="fa-solid fa-chevron-down absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i></div>)}</React.Fragment>
+                                    ))}
+                                    {showFeedback[i] === 'correct' && <i className="fa-solid fa-check text-success text-xl mr-2 fade-in"></i>}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ScreenAuditory = ({ nikkudLevel }) => {
+            const [currentQ, setCurrentQ] = useState(0);
+            const [errorMsg, setErrorMsg] = useState("");
+            const [shuffledOptions, setShuffledOptions] = useState([]);
+            useEffect(() => { if (currentQ < CONTENT.auditory.length) setShuffledOptions([...CONTENT.auditory[currentQ].options].sort(() => Math.random() - 0.5)); }, [currentQ]);
+            const speak = (textWithNikkud) => { if ('speechSynthesis' in window) { const utterance = new SpeechSynthesisUtterance(textWithNikkud); utterance.lang = 'he-IL'; utterance.rate = 0.9; window.speechSynthesis.speak(utterance); } };
+            const handleAnswer = (opt) => { if (opt === CONTENT.auditory[currentQ].word) { playSuccess(); setErrorMsg(""); if (currentQ < CONTENT.auditory.length - 1) setTimeout(() => setCurrentQ(q => q + 1), 1000); else triggerConfetti(); } else { playError(); setErrorMsg("נסה שוב!"); } };
+            if (currentQ >= CONTENT.auditory.length) return <div className="text-center text-3xl font-medium text-success fade-in mt-20">כל הכבוד! סיימתם את האימון השמיעתי.</div>;
+            const q = CONTENT.auditory[currentQ];
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-8 fade-in pb-10">
+                    <h2 className="text-3xl font-bold text-secondary">אימון שמיעתי</h2>
+                    <p className="text-xl text-gray-700 font-normal">לחצו על הרמקול, הקשיבו למילה, ובחרו את המילה הנכונה.</p>
+                    <button onClick={() => speak(q.word)} className="w-32 h-32 bg-blue-50 border-4 border-secondary rounded-full flex items-center justify-center text-5xl text-secondary shadow-lg hover:bg-blue-100 transition transform hover:scale-105 active:scale-95"><i className="fa-solid fa-volume-high"></i></button>
+                    <div className="flex gap-4 mt-8">{shuffledOptions.map((opt, i) => ( <button key={i} onClick={() => handleAnswer(opt)} className="px-8 py-4 bg-white border-2 border-accent rounded-xl text-2xl font-normal text-secondary shadow hover:bg-blue-50 transition">{formatText(opt, nikkudLevel)}</button> ))}</div>
+                    {errorMsg && <div className="text-error font-medium text-xl shake mt-4"><i className="fa-solid fa-circle-xmark mr-2"></i>{errorMsg}</div>}
+                    <div className="text-primary font-medium">שאלה {currentQ + 1} מתוך {CONTENT.auditory.length}</div>
+                </div>
+            );
+        };
+
+        const ScreenFluency = ({ nikkudLevel, attempts, setAttempts }) => {
+            const [timerOn, setTimerOn] = useState(false);
+            const [time, setTime] = useState(0);
+            const [done, setDone] = useState(false);
+            const allParaIds = CONTENT.paragraphs.map((_, i) => i.toString());
+            const [selectedParas, setSelectedParas] = useState(allParaIds);
+            const [activeWordId, setActiveWordId] = useState(null);
+            const parasToRender = CONTENT.paragraphs.filter((_, i) => selectedParas.includes(i.toString()));
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (timerOn && !done && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+                        e.preventDefault();
+                        const allWordIds = [];
+                        parasToRender.forEach((p) => { const originalIndex = CONTENT.paragraphs.findIndex(orig => orig.id === p.id); const words = formatText(p.text, nikkudLevel).split(/\s+/); words.forEach((w, wIndex) => allWordIds.push(`${originalIndex}-${wIndex}`)); });
+                        if (allWordIds.length === 0) return;
+                        if (!activeWordId) { setActiveWordId(allWordIds[0]); } else { const currentIndex = allWordIds.indexOf(activeWordId); if (currentIndex !== -1) { let nextIndex = e.key === 'ArrowLeft' ? currentIndex + 1 : currentIndex - 1; if (nextIndex >= allWordIds.length) nextIndex = currentIndex; if (nextIndex < 0) nextIndex = 0; setActiveWordId(allWordIds[nextIndex]); } }
+                    }
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [timerOn, done, activeWordId, parasToRender, nikkudLevel]);
+            useEffect(() => { if (activeWordId) { const el = document.getElementById(`word-${activeWordId}`); if (el) { const rect = el.getBoundingClientRect(); if (rect.top < 150 || rect.bottom > (window.innerHeight - 100)) el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } } }, [activeWordId]);
+            useEffect(() => { let interval = null; if (timerOn) { interval = setInterval(() => setTime(t => t + 1), 1000); } else if (!timerOn && time !== 0) { clearInterval(interval); } return () => clearInterval(interval); }, [timerOn, time]);
+            const handleReset = () => { setTimerOn(false); setTime(0); setDone(false); setActiveWordId(null); };
+            const togglePara = (id) => { if (timerOn || done) return; setSelectedParas(prev => { if (prev.length === CONTENT.paragraphs.length) return [id]; if (prev.includes(id)) { const next = prev.filter(p => p !== id); return next.length > 0 ? next : prev; } return [...prev, id].sort(); }); };
+            const toggleAll = () => { if (!timerOn && !done) setSelectedParas(allParaIds); };
+            const isAll = selectedParas.length === CONTENT.paragraphs.length;
+            const handleFinish = () => { setTimerOn(false); setDone(true); const wordsCount = parasToRender.reduce((acc, p) => acc + p.text.split(/\s+/).length, 0); const currentWcpm = time > 0 ? Math.round((wordsCount / time) * 60) : 0; setAttempts(prev => [...prev, { wcpm: currentWcpm }]); playSuccess(); triggerConfetti(); };
+            const renderTextWithMarker = (text, pIndex) => { const originalIndex = CONTENT.paragraphs.findIndex(orig => orig.id === parasToRender[pIndex].id); const formatted = formatText(text, nikkudLevel); const words = formatted.split(/\s+/); return words.map((w, i) => { const wordId = `${originalIndex}-${i}`; const isActive = activeWordId === wordId; return ( <span key={i} id={`word-${wordId}`} onClick={() => setActiveWordId(wordId)} className={`inline-block mx-1 cursor-pointer rounded transition-all duration-100 ${isActive ? 'reading-glow' : 'hover:bg-pink-100'} font-normal`}>{w}</span> ); }); };
+            return (
+                <div className="flex flex-col fade-in pb-10">
+                    <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <h2 className="text-3xl font-bold text-secondary">שטף קריאה</h2>
+                        {!timerOn && !done && ( <div className="flex bg-white rounded-lg shadow border border-accent p-1 flex-wrap justify-center"><button onClick={toggleAll} className={`px-4 py-1 rounded font-medium transition ${isAll ? 'bg-secondary text-white' : 'text-secondary hover:bg-blue-50'}`}>הכל</button>{CONTENT.paragraphs.map((p, i) => ( <button key={i} onClick={() => togglePara(i.toString())} className={`px-4 py-1 rounded font-medium transition ${!isAll && selectedParas.includes(i.toString()) ? 'bg-secondary text-white' : 'text-secondary hover:bg-blue-50'}`}>פסקה {p.id}</button> ))}</div> )}
+                        <div className="flex items-center gap-4 bg-white px-6 py-2 rounded-full shadow border border-accent"><i className="fa-solid fa-stopwatch text-2xl text-primary"></i><span className="text-2xl font-bold font-mono text-secondary">{Math.floor(time / 60).toString().padStart(2, '0')}:{(time % 60).toString().padStart(2, '0')}</span></div>
+                    </div>
+                    {!done && ( <div className="bg-blue-50 text-secondary text-sm p-2 text-center rounded-lg mb-4 shadow-sm border border-accent font-normal"><i className="fa-solid fa-lightbulb text-primary mr-1"></i> טיפ: השתמשו בלחיצת עכבר או בחצים במקלדת כדי למרקר את המיקום בטקסט.</div> )}
+                    <div className="mb-6 flex flex-wrap justify-center gap-4 relative z-10">{!timerOn && !done && ( <button onClick={() => setTimerOn(true)} className="px-10 py-4 bg-success text-white text-2xl font-medium rounded-xl shadow hover:bg-pink-600 transition"><i className="fa-solid fa-play mr-2"></i> התחילו קריאה</button> )}</div>
+                    <div className={`bg-white p-6 md:p-8 rounded-2xl shadow-md border border-accent text-3xl md:text-4xl leading-loose text-justify text-gray-800 relative font-normal ${done ? 'opacity-50' : ''}`}>{parasToRender.map((p, i) => ( <div key={i} className="mb-8"><span className="text-primary font-medium ml-2">פסקה {p.id}:</span>{renderTextWithMarker(p.text, i)}</div> ))}</div>
+                    {timerOn && ( <div className="mt-8 flex justify-center relative z-10 fade-in"><button onClick={handleFinish} className="px-12 py-5 bg-error text-white text-3xl font-medium rounded-xl shadow-lg hover:bg-red-600 transition animate-pulse"><i className="fa-solid fa-flag-checkered mr-2"></i> סיימתי לקרוא</button></div> )}
+                    {done && attempts.length > 0 && (
+                        <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4 fade-in">
+                            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-2xl border-4 border-secondary overflow-y-auto max-h-[90vh]">
+                                <h3 className="text-2xl font-medium text-center text-secondary mb-6"><i className="fa-solid fa-chart-simple mr-2"></i> גרף התקדמות</h3>
+                                <div className="flex items-end justify-center gap-6 h-40 border-b-2 border-accent pb-2">{attempts.map((att, idx) => { const maxWcpm = Math.max(...attempts.map(a => a.wcpm), 10); const height = `${(att.wcpm / maxWcpm) * 100}%`; return ( <div key={idx} className="flex flex-col items-center gap-2 h-full justify-end"><span className="text-secondary font-medium text-lg">{att.wcpm}</span><div className="w-16 bg-primary rounded-t-lg transition-all duration-1000 shadow" style={{height}}></div></div> ); })}</div>
+                                <div className="mt-8 text-center"><button onClick={handleReset} className="px-8 py-3 bg-secondary text-white text-xl font-medium rounded-xl shadow hover:bg-blue-800 transition">נסיון חוזר</button></div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const ScreenSingleParagraphStudy = ({ paraIdx, nikkudLevel }) => {
+            const [stage, setStage] = useState('pyramid');
+            const [pyramidStep, setPyramidStep] = useState(0);
+            const [currentQ, setCurrentQ] = useState(0);
+            const [selectedIdx, setSelectedIdx] = useState(null);
+            const [errorMsg, setErrorMsg] = useState("");
+            const pData = CONTENT.paragraphs[paraIdx];
+            useEffect(() => { setStage('pyramid'); setPyramidStep(0); setCurrentQ(0); setSelectedIdx(null); setErrorMsg(""); }, [paraIdx]);
+            const handleNextStage = () => { if (stage === 'pyramid') { pData.video ? setStage('video') : setStage('questions'); } else if (stage === 'video') { setStage('questions'); } };
+            const handleAnswer = (idx) => { setSelectedIdx(idx); if (idx === pData.questions[currentQ].a) { playSuccess(); setErrorMsg(""); setTimeout(() => { setSelectedIdx(null); if (currentQ < pData.questions.length - 1) { setCurrentQ(q => q + 1); } else { triggerConfetti(); setStage('done'); } }, 1000); } else { playError(); setErrorMsg("נסה שוב!"); setTimeout(() => setSelectedIdx(null), 1000); } };
+            return (
+                <div className="flex flex-col lg:flex-row gap-6 pb-10 h-full">
+                    <div className="flex-1 flex flex-col gap-4"><div className="bg-white p-6 md:p-8 rounded-2xl shadow-md border border-accent"><h2 className="text-2xl font-medium text-secondary mb-4 border-b-2 border-accent pb-2">{formatText("לִימּוּד פִּסְקָה", nikkudLevel)} {pData.id}</h2><ParagraphHighlighter key={`highlighter-${stage}-${currentQ}`} text={pData.text} nikkudLevel={nikkudLevel} /></div></div>
+                    <div className="w-full lg:w-[450px] xl:w-[500px] shrink-0 flex flex-col items-center justify-center bg-white p-6 md:p-8 rounded-2xl shadow-md border border-accent min-h-[50vh]">
+                        {stage === 'pyramid' && ( <div className="flex flex-col items-center w-full fade-in"><h3 className="text-2xl font-medium text-secondary mb-6">קריאת פירמידה</h3><div className="bg-blue-50 p-6 rounded-xl border border-accent w-full text-center space-y-3 mb-8">{pData.pyramid.slice(0, pyramidStep + 1).map((line, i) => ( <div key={i} className={`text-xl md:text-2xl font-normal text-secondary ${i === pyramidStep ? 'fade-in bg-blue-200 rounded-lg py-1 px-3 inline-block shadow-sm font-medium' : 'opacity-50'}`}>{formatText(line, nikkudLevel)}</div> ))}</div>{pyramidStep < pData.pyramid.length - 1 ? ( <button onClick={() => setPyramidStep(s => s + 1)} className="px-8 py-3 bg-secondary text-white text-xl font-medium rounded-xl shadow hover:bg-blue-800 transition">שורה הבאה <i className="fa-solid fa-arrow-down mr-2"></i></button> ) : ( <button onClick={handleNextStage} className="px-10 py-4 bg-success text-white text-xl font-medium rounded-xl shadow hover:bg-pink-600 transition fade-in">המשך לשלב הבא <i className="fa-solid fa-arrow-left mr-2"></i></button> )}</div> )}
+                        {stage === 'questions' && ( <div className="flex flex-col items-center w-full fade-in"><div className="flex justify-between items-center w-full mb-6"><span className="text-primary font-medium">שאלה {currentQ + 1} מתוך {pData.questions.length}</span><span className="bg-blue-100 text-secondary px-3 py-1 rounded-full text-sm font-medium border border-accent shadow-sm">{formatText(pData.questions[currentQ].category, nikkudLevel)}</span></div><h3 className="text-2xl md:text-3xl font-medium text-secondary mb-8 text-center">{formatText(pData.questions[currentQ].q, nikkudLevel)}</h3><div className="space-y-4 w-full">{pData.questions[currentQ].options.map((opt, i) => { let btnClass = "w-full text-right px-6 py-4 rounded-xl border-2 text-xl font-normal transition "; if (selectedIdx === i) btnClass += (i === pData.questions[currentQ].a) ? "bg-pink-100 border-success text-success" : "bg-red-100 border-error text-error shake"; else btnClass += "bg-blue-50 border-accent text-secondary hover:bg-blue-100"; return <button key={i} onClick={() => handleAnswer(i)} className={btnClass}>{formatText(opt, nikkudLevel)}</button>; })}</div>{errorMsg && <div className="text-error font-medium text-lg mt-6 shake text-center">{errorMsg}</div>}</div> )}
+                        {stage === 'done' && ( <div className="flex flex-col items-center justify-center h-full fade-in text-center space-y-6"><i className="fa-solid fa-star text-7xl text-success drop-shadow-sm"></i><h2 className="text-3xl font-medium text-success">כל הכבוד! סיימתם את הפסקה.</h2></div> )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ScreenOpenQuestions = ({ nikkudLevel, answers, setAnswers }) => {
+            const [showText, setShowText] = useState(false);
+            return (
+                <div className="flex flex-col fade-in max-w-4xl mx-auto w-full relative pb-10">
+                    <div className="flex justify-between items-center mb-6"><h2 className="text-3xl font-bold text-secondary">שאלות פתוחות</h2><button onClick={() => setShowText(true)} className="px-6 py-2 bg-blue-100 text-secondary rounded-xl border-2 border-accent font-medium shadow-md hover:bg-blue-200"><i className="fa-solid fa-book-open"></i> טקסט עזר ומרקר</button></div>
+                    <div className="space-y-6 pb-10">{CONTENT.openQuestions.map((q, i) => ( <div key={i} className="bg-white p-6 rounded-xl shadow-md border border-accent"><h3 className="text-xl font-medium text-secondary mb-4">{i+1}. {formatText(q, nikkudLevel)}</h3><textarea className="w-full h-32 p-4 border-2 border-accent rounded-lg outline-none focus:border-secondary text-lg font-normal resize-none bg-blue-50" value={answers[i]} onChange={(e) => { const newA = [...answers]; newA[i] = e.target.value; setAnswers(newA); }}></textarea></div> ))}</div>
+                    {showText && ( <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center p-4 fade-in"><div className="bg-white w-full max-w-4xl h-[90%] rounded-2xl shadow-2xl flex flex-col overflow-hidden border-4 border-secondary"><div className="bg-secondary text-white p-4 flex justify-between items-center shadow-md z-10"><h3 className="text-2xl font-medium">טקסט המקור</h3><button onClick={() => setShowText(false)} className="text-white text-3xl hover:text-red-300 transition"><i className="fa-solid fa-xmark"></i></button></div><div className="p-8 overflow-y-auto">{CONTENT.paragraphs.map((p, i) => ( <div key={i} className="mb-8 pb-8 border-b-2 border-gray-100 last:border-0"><strong className="text-primary text-2xl font-medium mb-3 block">פסקה {p.id}:</strong><ParagraphHighlighter key={`open-highlighter-${i}`} text={p.text} nikkudLevel={nikkudLevel} /></div> ))}</div></div></div> )}
+                </div>
+            );
+        };
+
+        const GenericQuestionCarousel = ({ questions, nikkudLevel }) => {
+            const [currentQ, setCurrentQ] = useState(0);
+            const [errorMsg, setErrorMsg] = useState("");
+            const [selectedIdx, setSelectedIdx] = useState(null);
+            const handleAnswer = (idx) => { setSelectedIdx(idx); if (idx === questions[currentQ].a) { playSuccess(); setErrorMsg(""); setTimeout(() => { setSelectedIdx(null); if (currentQ < questions.length - 1) setCurrentQ(q => q + 1); else triggerConfetti(); }, 1000); } else { playError(); setErrorMsg("נסה שוב!"); setTimeout(() => setSelectedIdx(null), 1000); } };
+            if (currentQ >= questions.length) return <div className="text-center text-3xl font-medium text-success fade-in mt-20">סיימתם! <i className="fa-solid fa-star"></i></div>;
+            const q = questions[currentQ];
+            return (
+                <div className="bg-white p-8 rounded-2xl shadow-md border border-accent fade-in flex flex-col justify-center max-w-3xl mx-auto w-full">
+                    <div className="text-primary font-medium mb-4">שאלה {currentQ + 1}/{questions.length}</div>
+                    <h3 className="text-3xl font-medium text-secondary mb-8">{formatText(q.q, nikkudLevel)}</h3>
+                    <div className="space-y-4">{q.options.map((opt, i) => { let btnClass = "w-full text-right px-6 py-5 rounded-xl border-2 text-2xl font-normal transition "; if (selectedIdx === i) btnClass += (i === q.a) ? "bg-pink-100 border-success text-success" : "bg-red-100 border-error text-error shake"; else btnClass += "bg-blue-50 border-accent text-secondary hover:bg-blue-100"; return <button key={i} onClick={() => handleAnswer(i)} className={btnClass}>{formatText(opt, nikkudLevel)}</button>; })}</div>
+                </div>
+            );
+        };
+
+        const ScreenLinguistic = ({ nikkudLevel }) => ( <div className="flex flex-col fade-in w-full pb-10"><h2 className="text-3xl font-bold text-secondary mb-6 text-center">עבודה לשונית</h2><GenericQuestionCarousel questions={CONTENT.linguistic} nikkudLevel={nikkudLevel} /></div> );
+        const ScreenAnalogies = ({ nikkudLevel }) => ( <div className="flex flex-col fade-in w-full pb-10"><h2 className="text-3xl font-bold text-secondary mb-6 text-center">אנלוגיות חשיבה</h2><GenericQuestionCarousel questions={CONTENT.analogies} nikkudLevel={nikkudLevel} /></div> );
+
+        const ScreenComparison = ({ nikkudLevel }) => {
+            const tableData = CONTENT.comparisonTable;
+            const [selections, setSelections] = useState({});
+            const [checked, setChecked] = useState(false);
+            const [allCorrect, setAllCorrect] = useState(false);
+            const handleSelect = (rowIdx, colKey, val) => { setSelections(prev => ({ ...prev, [`${rowIdx}-${colKey}`]: val })); setChecked(false); };
+            const checkAnswers = () => { let correctCount = 0; let totalCells = tableData.rows.length * 2; tableData.rows.forEach((row, i) => { if (selections[`${i}-a1`] === row.a1) correctCount++; if (selections[`${i}-a2`] === row.a2) correctCount++; }); const isAllCorrect = correctCount === totalCells; setAllCorrect(isAllCorrect); setChecked(true); if (isAllCorrect) { playSuccess(); triggerConfetti(); } else playError(); };
+            return (
+                <div className="flex flex-col fade-in w-full max-w-5xl mx-auto pb-10">
+                    <h2 className="text-3xl font-bold text-secondary mb-4 text-center">טבלת השוואה</h2>
+                    <div className="bg-white p-5 rounded-xl shadow-md border-l-4 border-primary mb-6 text-lg font-normal text-gray-800 leading-relaxed">{formatText(CONTENT.comparisonText, nikkudLevel)}</div>
+                    <div className="bg-white rounded-xl shadow-md border border-accent overflow-hidden">
+                        <div className="grid grid-cols-3 bg-secondary text-white font-medium text-xl border-b-2 border-primary">{tableData.headers.map((h, i) => <div key={i} className="p-4 text-center border-l border-blue-800">{formatText(h, nikkudLevel)}</div>)}</div>
+                        <div className="divide-y divide-accent">{tableData.rows.map((row, i) => ( <div key={i} className="grid grid-cols-3 text-lg font-normal"><div className="p-4 font-medium text-secondary bg-blue-50 flex items-center justify-center text-center border-l border-accent">{formatText(row.prop, nikkudLevel)}</div>{['a1', 'a2'].map((colKey) => { const expected = row[colKey]; const currentVal = selections[`${i}-${colKey}`] || ""; const isCheckedCorrect = checked && currentVal === expected; const isCheckedWrong = checked && currentVal !== "" && currentVal !== expected; return ( <div key={colKey} className="p-4 flex flex-col justify-center border-l border-accent"><select className={`w-full p-2 border-2 rounded-lg font-normal outline-none text-center ${isCheckedCorrect ? 'border-success bg-pink-50 text-success' : isCheckedWrong ? 'border-error bg-red-50 text-error shake' : 'border-accent text-gray-700'}`} value={currentVal} onChange={(e) => handleSelect(i, colKey, e.target.value)} disabled={allCorrect}><option value="" disabled>בחר...</option>{tableData.wordBank.map((word, wIdx) => <option key={wIdx} value={word}>{formatText(word, nikkudLevel)}</option>)}</select></div> ); })}</div> ))}</div>
+                    </div>
+                    <div className="mt-6 text-center">{!allCorrect && <button onClick={checkAnswers} className="px-10 py-3 bg-primary text-white text-xl font-medium rounded-xl shadow hover:bg-red-800">בדוק תשובות</button>}{allCorrect && <div className="text-2xl font-medium text-success fade-in px-10 py-3 bg-pink-100 rounded-xl inline-block border-2 border-success">מצוין! הטבלה מלאה ונכונה!</div>}</div>
+                </div>
+            );
+        };
+
+        const ScreenFlowchart = ({ nikkudLevel }) => {
+            const steps = ["אִירָאן חוֹסֶמֶת אֶת מֵצַר הוֹרְמוּז","אוֹנִיּוֹת הַנֵּפְטְ לֹא יְכוֹלוֹת לָצֵאת מֵהַמִּפְרָץ","יֵשׁ מַחְסוֹר בְּדֶלֶק בְּכָל מְדִינוֹת הָעוֹלָם","מְחִירֵי הַדֶּלֶק וְהַתַּחְבּוּרָה עוֹלִים לְמַעְלָה","כָּל הַמּוּצָרִים בַּחֲנוּיּוֹת הוֹפְכִים לִיקָרִים מְאוֹד"];
+            const [selections, setSelections] = useState({});
+            const [checked, setChecked] = useState(false);
+            const [allCorrect, setAllCorrect] = useState(false);
+            const [shuffledOptions, setShuffledOptions] = useState([]);
+            useEffect(() => { setShuffledOptions([...steps].sort(() => Math.random() - 0.5)); }, []);
+            const handleSelect = (idx, value) => { setSelections(prev => ({ ...prev, [idx]: value })); setChecked(false); };
+            const checkAnswers = () => { let correct = 0; steps.forEach((step, idx) => { if (selections[idx] === step) correct++; }); const isAllCorrect = correct === steps.length; setAllCorrect(isAllCorrect); setChecked(true); if (isAllCorrect) { playSuccess(); triggerConfetti(); } else playError(); };
+            return (
+                <div className="flex flex-col fade-in max-w-4xl mx-auto w-full pb-10">
+                    <h2 className="text-3xl font-bold text-secondary mb-2 text-center">תרשים זרימה</h2>
+                    <p className="text-center text-gray-700 mb-6 text-lg font-normal">סדרו את השלבים לפי הסדר ההגיוני</p>
+                    <div className="flex flex-col items-center gap-1">{steps.map((correctStep, idx) => ( <React.Fragment key={idx}><div className="w-full max-w-2xl bg-white p-4 rounded-xl shadow-md border-2 border-accent text-center relative z-10"><div className="absolute -right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-white">{idx + 1}</div><select className={`w-full p-3 text-lg md:text-xl font-normal outline-none border-2 rounded-lg text-center appearance-none ${checked ? (selections[idx] === correctStep ? 'border-success bg-pink-50 text-success' : 'border-error bg-red-50 text-error shake') : 'border-transparent bg-blue-50 text-secondary hover:bg-blue-100'}`} value={selections[idx] || ""} onChange={(e) => handleSelect(idx, e.target.value)} disabled={allCorrect}><option value="" disabled>בחר את השלב המתאים לכאן...</option>{shuffledOptions.map((opt, oIdx) => <option key={oIdx} value={opt}>{formatText(opt, nikkudLevel)}</option>)}</select></div>{idx < steps.length - 1 && ( <div className="flex flex-col items-center text-primary text-3xl py-1 z-0"><i className="fa-solid fa-arrow-down fade-in opacity-80"></i></div> )}</React.Fragment> ))}</div>
+                    <div className="mt-8 text-center">{!allCorrect && <button onClick={checkAnswers} disabled={Object.keys(selections).length < steps.length} className="px-10 py-3 bg-secondary text-white text-xl font-medium rounded-xl shadow disabled:opacity-50 hover:bg-blue-800 transition">בדוק תרשים</button>}{allCorrect && <div className="text-2xl font-medium text-success fade-in px-10 py-3 bg-pink-100 rounded-xl inline-block border-2 border-success shadow-md">מעולה!</div>}</div>
+                </div>
+            );
+        };
+
+        const ScreenFlashGame = ({ nikkudLevel }) => {
+            const [gameState, setGameState] = useState('start');
+            const [score, setScore] = useState(0);
+            const [timeLeft, setTimeLeft] = useState(120);
+            const [displayTime, setDisplayTime] = useState(2);
+            const [gameDuration, setGameDuration] = useState(120);
+            const [currentWord, setCurrentWord] = useState(null);
+            const [feedback, setFeedback] = useState(null);
+            useEffect(() => { let timer; if (gameState === 'word' || gameState === 'guess') { timer = setInterval(() => { setTimeLeft(prev => { if (prev <= 1) { setGameState('end'); return 0; } return prev - 1; }); }, 1000); } return () => clearInterval(timer); }, [gameState]);
+            const nextWord = () => { const randomItem = CONTENT.flashData[Math.floor(Math.random() * CONTENT.flashData.length)]; const shuffledOptions = [...randomItem.options].sort(() => Math.random() - 0.5); setCurrentWord({ ...randomItem, shuffledOptions }); setGameState('word'); setFeedback(null); setTimeout(() => { setGameState(prev => prev === 'word' ? 'guess' : prev); }, displayTime * 1000); };
+            const startGame = () => { setScore(0); setTimeLeft(gameDuration); nextWord(); };
+            const handleGuess = (opt) => { if (opt === currentWord.word) { playSuccess(); setScore(s => s + 5); setFeedback('correct'); } else { playError(); setScore(s => s - 5); setFeedback('error'); } setTimeout(() => { if (timeLeft > 0 && gameState !== 'end') nextWord(); }, 1000); };
+            return (
+                <div className="flex flex-col items-center justify-start min-h-[70vh] fade-in w-full max-w-3xl mx-auto pb-10">
+                    <h2 className="text-3xl font-bold text-secondary mb-2 text-center">משחק זיהוי מהיר</h2>
+                    <p className="text-center text-gray-700 mb-6 font-normal">מילה תופיע על המסך ותעלם במהירות. מצאו אותה בין האפשרויות!</p>
+                    <div className="flex justify-between items-center w-full mb-8 bg-white p-4 rounded-xl shadow border-2 border-accent"><div className="text-2xl font-medium text-primary">ניקוד: <span dir="ltr">{score}</span></div><div className={`text-2xl font-medium font-mono ${timeLeft <= 10 ? 'text-error animate-pulse' : 'text-secondary'}`}><i className="fa-regular fa-clock"></i> {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}</div></div>
+                    <div className="flex-1 flex flex-col items-center justify-center w-full min-h-[300px]">
+                        {gameState === 'start' && ( <div className="flex flex-col items-center gap-6 w-full"><div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full"><div className="flex flex-wrap justify-center gap-3 bg-blue-50 p-4 rounded-xl border border-accent"><span className="text-xl font-medium text-secondary w-full text-center mb-2">זמן היעלמות המילה:</span>{[0.5, 1, 2, 3].map(sec => ( <button key={sec} onClick={() => setDisplayTime(sec)} className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${displayTime === sec ? 'bg-primary text-white border-primary scale-105' : 'bg-white text-secondary border-accent hover:bg-blue-100'}`}>{sec === 0.5 ? 'חצי שנייה' : sec === 1 ? 'שנייה' : sec + ' שניות'}</button> ))}</div><div className="flex flex-wrap justify-center gap-3 bg-blue-50 p-4 rounded-xl border border-accent"><span className="text-xl font-medium text-secondary w-full text-center mb-2">אורך המשחק:</span>{[30, 60, 90, 120].map(sec => ( <button key={`dur-${sec}`} onClick={() => setGameDuration(sec)} className={`px-4 py-2 rounded-lg font-medium border-2 transition-all ${gameDuration === sec ? 'bg-primary text-white border-primary scale-105' : 'bg-white text-secondary border-accent hover:bg-blue-100'}`}>{sec === 30 ? 'חצי דקה' : sec === 60 ? 'דקה' : sec === 90 ? 'דקה וחצי' : '2 דקות'}</button> ))}</div></div><button onClick={startGame} className="px-10 py-5 bg-success text-white text-3xl font-medium rounded-2xl shadow-lg hover:bg-pink-600 transition animate-glow"><i className="fa-solid fa-play mr-2"></i> התחל משחק</button></div> )}
+                        {gameState === 'word' && currentWord && ( <div className="text-6xl md:text-8xl font-medium text-secondary animate-pulse fade-in">{formatText(currentWord.word, nikkudLevel)}</div> )}
+                        {gameState === 'guess' && currentWord && ( <div className="w-full flex flex-col items-center gap-6 fade-in"><div className="text-3xl font-medium text-secondary mb-4">איזו מילה הופיעה?</div><div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">{currentWord.shuffledOptions.map((opt, i) => ( <button key={i} onClick={() => handleGuess(opt)} disabled={feedback !== null} className={`py-6 px-4 text-3xl font-medium rounded-xl border-4 shadow-md transition-all ${feedback === 'correct' && opt === currentWord.word ? 'bg-pink-100 border-success text-success scale-105' : feedback === 'error' && opt === currentWord.word ? 'bg-pink-50 border-success text-success opacity-50' : feedback === 'error' ? 'bg-red-50 border-error text-error opacity-50' : 'bg-white border-accent text-secondary hover:bg-blue-50'}`}>{formatText(opt, nikkudLevel)}</button> ))}</div>{feedback === 'correct' && <div className="text-success text-4xl font-medium fade-in mt-4">+5 נקודות!</div>}{feedback === 'error' && <div className="text-error text-4xl font-medium fade-in mt-4 shake">-5 נקודות...</div>}</div> )}
+                        {gameState === 'end' && ( <div className="flex flex-col items-center gap-6 fade-in bg-blue-50 p-10 rounded-3xl border-4 border-secondary text-center shadow-xl"><i className="fa-solid fa-trophy text-6xl text-yellow-500 mb-2 drop-shadow-md"></i><h3 className="text-4xl font-medium text-secondary">הזמן עבר!</h3><p className="text-3xl font-medium text-primary">הניקוד הסופי שלך: {score}</p><button onClick={startGame} className="mt-4 px-8 py-4 bg-secondary text-white text-xl font-medium rounded-xl shadow hover:bg-blue-800 transition">שחקו שוב</button></div> )}
+                    </div>
+                </div>
+            );
+        };
+
+        const ScreenSurvey = ({ onExport }) => {
+            const [ratings, setRatings] = useState({ interest: null, difficulty: null, newThings: null });
+            const [submitted, setSubmitted] = useState(false);
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[70vh] fade-in w-full max-w-3xl mx-auto space-y-6 pb-10">
+                    <h2 className="text-4xl md:text-5xl font-bold text-success mb-2 text-center">כל הכבוד, סיימתם את הלומדה!</h2>
+                    {!submitted ? ( <div className="bg-white p-8 rounded-2xl shadow-xl border-4 border-secondary w-full mt-4"><h3 className="text-2xl font-medium text-secondary mb-6 text-center">נשמח לשמוע איך היה השיעור:</h3><div className="space-y-6">{['interest', 'difficulty', 'newThings'].map((cat, i) => ( <div key={cat} className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-blue-50 p-4 rounded-xl border border-accent"><span className="text-xl font-medium text-secondary">{['עניין', 'קושי', 'דברים חדשים'][i]}</span><div className="flex gap-6 justify-center" dir="ltr"><button onClick={() => setRatings(prev => ({ ...prev, [cat]: 'sad' }))} className={`text-4xl ${ratings[cat] === 'sad' ? 'text-error' : 'text-gray-400 opacity-50 hover:opacity-100'}`}><i className="fa-solid fa-face-frown"></i></button><button onClick={() => setRatings(prev => ({ ...prev, [cat]: 'meh' }))} className={`text-4xl ${ratings[cat] === 'meh' ? 'text-yellow-500' : 'text-gray-400 opacity-50 hover:opacity-100'}`}><i className="fa-solid fa-face-meh"></i></button><button onClick={() => setRatings(prev => ({ ...prev, [cat]: 'happy' }))} className={`text-4xl ${ratings[cat] === 'happy' ? 'text-success' : 'text-gray-400 opacity-50 hover:opacity-100'}`}><i className="fa-solid fa-face-smile"></i></button></div></div> ))}</div><div className="mt-8 flex flex-col md:flex-row justify-center gap-4"><button onClick={() => { setSubmitted(true); triggerConfetti(); playSuccess(); }} disabled={!ratings.interest || !ratings.difficulty || !ratings.newThings} className="px-10 py-4 bg-primary text-white text-xl font-medium rounded-xl shadow-lg disabled:opacity-50 hover:bg-red-800">שליחת משוב וסיום</button><button onClick={onExport} className="px-6 py-4 bg-secondary text-white text-xl font-medium rounded-xl shadow-lg flex items-center justify-center gap-2 hover:bg-blue-800"><i className="fa-solid fa-envelope"></i> צפייה בתוצאות</button></div></div> ) : ( <div className="flex flex-col items-center gap-6 w-full"><div className="bg-pink-100 p-8 rounded-2xl shadow-lg border-2 border-success text-center mt-8 fade-in w-full"><h3 className="text-3xl font-medium text-success mb-4">תודה רבה!</h3></div><button onClick={onExport} className="px-8 py-4 bg-secondary text-white text-xl font-medium rounded-xl shadow-lg flex items-center gap-3 fade-in hover:bg-blue-800"><i className="fa-solid fa-envelope"></i> לחצו כאן לצפייה בתוצאות</button></div> )}
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [currentScreen, setCurrentScreen] = useState(0);
+            const [nikkudLevel, setNikkudLevel] = useState('full');
+            const [isMuted, setIsMuted] = useState(true);
+            const [isShowResults, setIsShowResults] = useState(false);
+            const [fluencyAttempts, setFluencyAttempts] = useState([]);
+            const [openAnswers, setOpenAnswers] = useState(Array(CONTENT.openQuestions.length).fill(""));
+            const [teacherEmail, setTeacherEmail] = useState("");
+            const [copySuccess, setCopySuccess] = useState(false);
+            const audioCtxRef = useRef(null); const noiseNodeRef = useRef(null);
+            const initNoise = () => { try { if (!audioCtxRef.current) audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)(); if (!noiseNodeRef.current) { const bufferSize = audioCtxRef.current.sampleRate * 2; const buffer = audioCtxRef.current.createBuffer(1, bufferSize, audioCtxRef.current.sampleRate); const data = buffer.getChannelData(0); for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1; const noise = audioCtxRef.current.createBufferSource(); noise.buffer = buffer; noise.loop = true; const gainNode = audioCtxRef.current.createGain(); gainNode.gain.value = 0.03; noise.connect(gainNode); gainNode.connect(audioCtxRef.current.destination); noise.start(); noiseNodeRef.current = { source: noise, gain: gainNode }; } } catch(e) {} };
+            useEffect(() => { if (audioCtxRef.current) { if (isMuted) { if (audioCtxRef.current.state === 'running') audioCtxRef.current.suspend(); } else { if (audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); } } }, [isMuted, currentScreen]);
+            const generateResultsText = () => { let text = `סיכום תוצאות אישי - ${formatText(CONTENT.title, 'none')}\n\n`; text += `--- שטף קריאה (WCPM) ---\n`; if (fluencyAttempts.length > 0) fluencyAttempts.forEach((a, i) => text += `ניסיון ${i + 1}: ${a.wcpm} מילים בדקה\n`); else text += `לא בוצע תרגול שטף קריאה.\n`; text += `\n--- שאלות פתוחות ---\n`; CONTENT.openQuestions.forEach((q, i) => { text += `שאלה ${i + 1}: ${formatText(q, 'none')}\nתשובה: ${openAnswers[i] ? openAnswers[i] : 'לא ניתנה תשובה.'}\n\n`; }); return text; };
+            const handleCopyText = () => { const fullText = `תוצאות לומדה: ${formatText(CONTENT.title, 'none')}\n\n` + generateResultsText(); const textArea = document.createElement("textarea"); textArea.value = fullText; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); setCopySuccess(true); setTimeout(() => setCopySuccess(false), 3000); } catch (err) {} document.body.removeChild(textArea); };
+            const screens = [
+                <ScreenHome key="home" onNext={() => { if (!isMuted) { initNoise(); if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); } setCurrentScreen(1); }} nikkudLevel={nikkudLevel} />,
+                <ScreenVocab key="vocab" nikkudLevel={nikkudLevel} />,
+                <ScreenAuditory key="aud" nikkudLevel={nikkudLevel} />,
+                <ScreenFluency key="fluency" nikkudLevel={nikkudLevel} attempts={fluencyAttempts} setAttempts={setFluencyAttempts} />,
+                ...CONTENT.paragraphs.map((p, i) => <ScreenSingleParagraphStudy key={'para'+i} paraIdx={i} nikkudLevel={nikkudLevel} />),
+                <ScreenOpenQuestions key="open" nikkudLevel={nikkudLevel} answers={openAnswers} setAnswers={setOpenAnswers} />,
+                <ScreenLinguistic key="ling" nikkudLevel={nikkudLevel} />,
+                <ScreenAnalogies key="analogy" nikkudLevel={nikkudLevel} />,
+                <ScreenComparison key="comp" nikkudLevel={nikkudLevel} />,
+                <ScreenFlowchart key="flow" nikkudLevel={nikkudLevel} />,
+                <ScreenFlashGame key="game" nikkudLevel={nikkudLevel} />,
+                <ScreenSurvey key="survey" onExport={() => setIsShowResults(true)} />
+            ];
+            const screenTitles = ["בית", "אוצר מילים", "שמיעתי", "שטף קריאה", ...CONTENT.paragraphs.map(p => `פסקה ${p.id}`), "שאלות פתוחות", "עבודה לשונית", "אנלוגיות", "טבלת השוואה", "תרשים זרימה", "זיהוי מהיר", "סיכום וסקר"];
+            if (isShowResults) {
+                return (
+                    <div className="p-4 md:p-8 bg-bglight text-black min-h-screen" dir="rtl">
+                        <div className="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-4 rounded-xl border-2 border-accent shadow-sm gap-4"><div><h2 className="text-2xl font-bold text-secondary mb-1">סיכום תוצאות אישי</h2></div><button onClick={() => setIsShowResults(false)} className="px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-xl shadow hover:bg-gray-300 flex items-center gap-2"><i className="fa-solid fa-arrow-right"></i> חזור ללומדה</button></div>
+                        <div className="max-w-4xl mx-auto">
+                            <div className="bg-white p-6 rounded-2xl shadow-lg border-4 border-secondary mb-8 flex flex-col gap-4"><h3 className="text-xl font-medium text-secondary">שליחת התוצאות</h3><input type="email" placeholder="כתובת המייל של המורה" className="p-3 border-2 border-accent rounded-lg outline-none w-full text-left bg-blue-50 font-normal" dir="ltr" value={teacherEmail} onChange={(e) => setTeacherEmail(e.target.value)} /><div className="flex flex-col sm:flex-row gap-3 mt-2"><a href={`https://mail.google.com/mail/?view=cm&fs=1&to=${teacherEmail}&su=${encodeURIComponent('תוצאות לומדה: ' + formatText(CONTENT.title, 'none'))}&body=${encodeURIComponent(generateResultsText())}`} target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-4 bg-primary text-white font-medium rounded-xl text-center"><i className="fa-brands fa-google"></i> פתח ב-Gmail</a><a href={`mailto:${teacherEmail}?subject=${encodeURIComponent('תוצאות לומדה: ' + formatText(CONTENT.title, 'none'))}&body=${encodeURIComponent(generateResultsText())}`} target="_blank" rel="noopener noreferrer" className="flex-1 px-4 py-4 bg-secondary text-white font-medium rounded-xl text-center"><i className="fa-solid fa-envelope"></i> אפליקציית מייל</a><button onClick={handleCopyText} className="flex-1 px-4 py-4 bg-gray-700 text-white font-medium rounded-xl"><i className={`fa-solid ${copySuccess ? 'fa-check' : 'fa-copy'}`}></i> {copySuccess ? 'הועתק!' : 'העתק טקסט'}</button></div></div>
+                            <h1 className="text-4xl font-bold text-primary border-b-4 border-accent pb-4 mb-8 text-center">סיכום אישי</h1>
+                            <div className="mb-8 p-6 bg-white rounded-2xl border-2 border-accent shadow-sm"><h2 className="text-2xl font-bold text-secondary mb-4">שטף קריאה (WCPM)</h2>{fluencyAttempts.length > 0 ? fluencyAttempts.map((a, i) => <p key={i} className="text-xl mb-3 font-normal">ניסיון {i+1}: <span className="text-success font-medium">{a.wcpm} מילים בדקה</span></p>) : <p className="text-gray-600 font-normal">לא בוצע תרגול.</p>}</div>
+                            <div className="mb-8 p-6 bg-white rounded-2xl border-2 border-accent shadow-sm"><h2 className="text-2xl font-bold text-secondary mb-6">שאלות פתוחות</h2>{CONTENT.openQuestions.map((q, i) => ( <div key={i} className="mb-6"><div className="font-medium text-xl mb-3 text-secondary">{i+1}. {formatText(q, 'none')}</div><div className="p-4 bg-blue-50 border-2 border-dashed border-accent rounded-xl min-h-[4rem] text-lg text-gray-800 font-normal">{openAnswers[i] || 'לא ניתנה תשובה.'}</div></div> ))}</div>
+                        </div>
+                    </div>
+                );
+            }
+            return (
+                <div className="flex flex-col min-h-screen bg-bglight relative print:hidden">
+                    <div className="sticky top-0 z-50 w-full shadow-sm">
+                        <header className="bg-white border-b-4 border-primary p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-3"><button onClick={() => setCurrentScreen(0)} className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-blue-50 text-secondary"><i className="fa-solid fa-house"></i></button><i className="fa-solid fa-ship text-3xl text-primary hidden md:block"></i><h1 className="text-xl font-bold text-secondary hidden md:block">{formatText(CONTENT.title, 'none')}</h1></div>
+                            <div className="flex items-center gap-4"><div className="bg-blue-50 rounded-lg p-1 border border-accent flex text-sm font-medium"><button onClick={() => setNikkudLevel('full')} className={`px-3 py-1.5 rounded ${nikkudLevel === 'full' ? 'bg-secondary text-white' : 'text-secondary'}`}>מלא</button><button onClick={() => setNikkudLevel('partial')} className={`px-3 py-1.5 rounded ${nikkudLevel === 'partial' ? 'bg-secondary text-white' : 'text-secondary'}`}>חלקי</button><button onClick={() => setNikkudLevel('none')} className={`px-3 py-1.5 rounded ${nikkudLevel === 'none' ? 'bg-secondary text-white' : 'text-secondary'}`}>ללא</button></div><button onClick={() => { const nm = !isMuted; setIsMuted(nm); if (!nm) { initNoise(); if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') audioCtxRef.current.resume(); } else { if (audioCtxRef.current && audioCtxRef.current.state === 'running') audioCtxRef.current.suspend(); } }} className={`w-12 h-12 rounded-full flex items-center justify-center text-xl shadow-md ${isMuted ? 'bg-gray-200 text-gray-600' : 'bg-secondary text-white'}`}><i className={`fa-solid ${isMuted ? 'fa-volume-xmark' : 'fa-wave-square'}`}></i></button></div>
+                        </header>
+                        <nav className="bg-white border-b-2 border-accent overflow-x-auto whitespace-nowrap px-4 py-3 flex gap-3 hide-scrollbar shadow-inner w-full" dir="rtl">{screenTitles.map((title, i) => ( <button key={i} onClick={() => { setCurrentScreen(i); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className={`px-5 py-2 rounded-full text-sm md:text-base font-medium transition-all ${currentScreen === i ? 'bg-secondary text-white scale-105 border-2 border-secondary' : 'bg-blue-50 text-secondary border-2 border-accent'}`}>{title}</button> ))}</nav>
+                        <div className="w-full bg-accent h-3 border-b border-blue-200"><div className="bg-primary h-full transition-all duration-500 ease-out" style={{ width: `${(currentScreen / (screens.length - 1)) * 100}%` }}></div></div>
+                    </div>
+                    <main className="flex-1 relative max-w-6xl mx-auto w-full p-4 md:p-6 pb-20">{screens[currentScreen]}</main>
+                    {currentScreen > 0 && ( <footer className="bg-white border-t flex flex-col z-40 sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] mt-auto w-full"><div className="p-4 flex justify-between items-center w-full"><button onClick={() => { setCurrentScreen(Math.max(0, currentScreen - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={currentScreen === 0} className="px-6 py-2 bg-blue-50 text-secondary font-medium rounded-lg disabled:opacity-50 border border-accent"><i className="fa-solid fa-arrow-right mr-2"></i> הקודם</button><button onClick={() => { setCurrentScreen(Math.min(screens.length - 1, currentScreen + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }} disabled={currentScreen === screens.length - 1} className="px-6 py-2 bg-secondary text-white rounded-lg disabled:opacity-50 font-medium">הבא <i className="fa-solid fa-arrow-left ml-2"></i></button></div><div className="bg-blue-50 text-center py-2 text-xs md:text-sm font-normal text-secondary border-t border-accent w-full shadow-inner"><i className="fa-solid fa-star text-primary text-[10px] mr-1"></i> נוצר ע"י מורן קמיל גלברג הוראה מוּתְאֶמֶת, באמצעות בינה מלאכותית <i className="fa-solid fa-star text-primary text-[10px] ml-1"></i></div></footer> )}
+                </div>
+            );
+        };
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
